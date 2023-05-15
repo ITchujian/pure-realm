@@ -1,0 +1,72 @@
+/* 整个窗口的样式 */
+QWidget {
+    background-color: #f2f2f2;
+}
+
+/* 标题标签的样式 */
+#TitleLabel {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* “检测流氓软件”按钮的样式 */
+#DetectButton {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #4caf50;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-right: 20px;
+}
+
+#DetectButton:hover {
+    background-color: #3e8e41;
+}
+
+#DetectButton:pressed {
+    background-color: #2e6e31;
+}
+
+/* “卸载流氓软件”按钮的样式 */
+#UninstallButton {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #f44336;
+    border-radius: 5px;
+    padding: 10px 20px;
+}
+
+#UninstallButton:hover {
+    background-color: #c62828;
+}
+
+#UninstallButton:pressed {
+    background-color: #8e0000;
+}
+
+/* 列表的样式 */
+#ListWidget {
+    font-size: 16px;
+    background-color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#ListWidget::item:selected {
+    background-color: #4caf50;
+    color: #fff;
+}
+
+/* 进度条的样式 */
+#ProgressBar {
+    height: 20px;
+    margin-top: 20px;
+}
