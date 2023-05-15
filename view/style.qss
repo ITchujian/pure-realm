@@ -67,6 +67,13 @@ QWidget {
 
 /* 进度条的样式 */
 #ProgressBar {
-    height: 20px;
-    margin-top: 20px;
+    height: 30px;
+    border: none;
+    margin-bottom: 10px;
+    font-size: 10px;
+    text-align: center;
+}
+
+#ProgressBar::chunk {
+    background-color: #4caf50;
 }

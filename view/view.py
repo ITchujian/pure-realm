@@ -96,11 +96,11 @@ class MainWindow(QMainWindow):
         # 创建一个进度条，用于显示检测和卸载的进度
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setObjectName('ProgressBar')
-        self.progress_bar.setVisible(False)
+        self.progress_bar.setVisible(True)
         v_layout.addWidget(self.progress_bar)
 
         # 设置窗口的样式表
-        with open('./view/style.qss', 'r') as f:
+        with open('./view/style.qss', 'r', encoding="utf-8") as f:
             self.setStyleSheet(f.read())
         # 显示主窗口
         self.show()
@@ -119,7 +119,7 @@ class MainWindow(QMainWindow):
         self.list_widget.addItem(item)
 
     def detect_finished(self):
-        self.progress_bar.setVisible(False)
+        self.progress_bar.setVisible(True)
 
     def uninstall(self):
         self.progress_bar.setValue(0)
