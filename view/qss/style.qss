@@ -70,9 +70,14 @@ QWidget#central_widget {
     text-align: center;
 }
 
-#ListWidget::item:selected {
+#ListWidget::item::selected,#ListWidget::item::selected::hover {
     background-color: #00b8a9;
     color: #fff;
+    border-radius: 15px;
+}
+
+#ListWidget::item::hover {
+    background-color: rgba(0, 184, 169, 12);
     border-radius: 15px;
 }
 

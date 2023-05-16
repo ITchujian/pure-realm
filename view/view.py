@@ -1,10 +1,13 @@
 import os
 import sys
+from threading import Thread
 from PyQt5.QtCore import Qt, QProcess, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon, QPixmap, QBitmap, QPainter
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QPushButton, QListWidget, QListWidgetItem, QFileDialog, QProgressBar, QDesktopWidget)
 from view.title_bar import TitleBar
+from view.dialog import CustomDialog
+from controller.controller import Controller
 
 
 class DetectionThread(QThread):
@@ -12,16 +15,24 @@ class DetectionThread(QThread):
     detected = pyqtSignal(str)
     progress = pyqtSignal(int)
 
-    def __init__(self):
+    def __init__(self, controller):
+        self.controller = controller
         super().__init__()
 
     def run(self):
         # 在这里实现检测流氓软件的功能
-        for i in range(1, 101):
-            self.progress.emit(i)
-        self.detected.emit('2345全家桶')
-        self.detected.emit('腾讯QQ电脑管家')
-        self.detected.emit('百度卫士')
+        total = len(self.controller.software_list)
+        unit = 0
+        for name, version, uninstall, feature in self.controller.software_list:
+            # if self.controller.is_malware_by_name(name) \
+            #         or self.controller.is_malware_by_version(name, version) \
+            #         or self.controller.is_malware_by_feature(feature):
+            #     # if self.controller.is_malware_by_feature(feature):
+            #     self.detected.emit(name)
+            self.detected.emit(name)
+            unit += int((1 / total) * 100)
+            self.progress.emit(unit)
+        self.progress.emit(100)
         self.finished.emit()
 
 
@@ -30,36 +41,38 @@ class UninstallThread(QThread):
     uninstalled = pyqtSignal()
     progress = pyqtSignal(int)
 
-    def __init__(self, item):
-        super().__init__()
+    def __init__(self, item: QListWidgetItem, controller):
         self.item = item
+        self.controller = controller
+        super().__init__()
 
     def run(self):
         # 在这里实现卸载流氓软件的功能
-        for i in range(1, 101):
-            self.progress.emit(i)
-        self.uninstalled.emit()
-        self.finished.emit()
+        if self.controller.uninstall_software(self.item.text()):
+            self.progress.emit(50)
+            self.uninstalled.emit()
+            self.finished.emit()
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, controller: Controller):
+        self.controller = controller
         self.list_widget = None
         self.progress_bar = None
         self.detect_thread = None
         self.uninstall_thread = None
         self.move_tag = False
         super().__init__()
-        self.initUI()
+        self.init_ui()
 
-    def initUI(self):
+    def init_ui(self):
         # 设置主窗口的大小和位置
         self.resize(520, 322)
 
         # 设置主窗口的图标的标题
         self.setWindowIcon(QIcon('path/to/your/icon.png'))
         self.setWindowTitle("人间净土")
-        self.setWindowFlags(Qt.CustomizeWindowHint)
+        self.setWindowFlags(Qt.CustomizeWindowHint | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.center_window()
 
@@ -107,12 +120,6 @@ class MainWindow(QMainWindow):
         self.list_widget.setObjectName('ListWidget')
         v_layout.addWidget(self.list_widget)
 
-        # 设置窗口的样式表
-        with open('./view/style.qss', 'r', encoding="utf-8") as f:
-            self.setStyleSheet(f.read())
-        # 显示主窗口
-        self.show()
-
     def center_window(self):
         # 获取屏幕的几何信息
         screen_geometry = QDesktopWidget().availableGeometry()
@@ -126,10 +133,10 @@ class MainWindow(QMainWindow):
         self.move(x, y)
 
     def detect(self):
+        self.controller.get_installed_software()
         self.progress_bar.setValue(0)
-        self.progress_bar.setVisible(True)
         self.list_widget.clear()
-        self.detect_thread = DetectionThread()
+        self.detect_thread = DetectionThread(self.controller)
         self.detect_thread.detected.connect(self.add_to_list)
         self.detect_thread.finished.connect(self.detect_finished)
         self.detect_thread.progress.connect(self.update_progress_bar)
@@ -139,15 +146,14 @@ class MainWindow(QMainWindow):
         self.list_widget.addItem(item)
 
     def detect_finished(self):
-        self.progress_bar.setVisible(True)
+        self.progress_bar.setValue(0)
 
     def uninstall(self):
         self.progress_bar.setValue(0)
-        self.progress_bar.setVisible(True)
         items = self.list_widget.selectedItems()
         if len(items) > 0:
             item = items[0]
-            self.uninstall_thread = UninstallThread(item)
+            self.uninstall_thread = UninstallThread(item, self.controller)
             self.uninstall_thread.uninstalled.connect(self.remove_from_list)
             self.uninstall_thread.finished.connect(self.uninstall_finished)
             self.uninstall_thread.progress.connect(self.update_progress_bar)
@@ -158,7 +164,7 @@ class MainWindow(QMainWindow):
         self.list_widget.takeItem(self.list_widget.row(item))
 
     def uninstall_finished(self):
-        self.progress_bar.setVisible(True)
+        self.progress_bar.setValue(0)
 
     def update_progress_bar(self, value):
         self.progress_bar.setValue(value)

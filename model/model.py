@@ -2,9 +2,9 @@ from typing import Iterable
 
 
 class SoftwareVersion:
-    def __init__(self, version: str, features: Iterable, paths: Iterable):
+    def __init__(self, version: str, feature: str, paths: Iterable):
         self.version = version
-        self.features = features
+        self.feature = feature
         self.paths = paths
 
 
