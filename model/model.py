@@ -3,9 +3,9 @@ from typing import Iterable
 
 class SoftwareVersion:
     def __init__(self, version: str, feature: str, paths: Iterable):
-        self.version = version
-        self.feature = feature
-        self.paths = paths
+        self.version = None if version == "" else version
+        self.feature = None if feature == "" else feature
+        self.paths = paths if paths else None
 
 
 class Software:

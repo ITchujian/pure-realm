@@ -12,7 +12,7 @@ from controller.controller import Controller
 
 class DetectionThread(QThread):
     finished = pyqtSignal()
-    detected = pyqtSignal(str)
+    detected = pyqtSignal(str, str)
     progress = pyqtSignal(int)
 
     def __init__(self, controller):
@@ -24,12 +24,9 @@ class DetectionThread(QThread):
         total = len(self.controller.software_list)
         unit = 0
         for name, version, uninstall, feature in self.controller.software_list:
-            # if self.controller.is_malware_by_name(name) \
-            #         or self.controller.is_malware_by_version(name, version) \
-            #         or self.controller.is_malware_by_feature(feature):
-            #     # if self.controller.is_malware_by_feature(feature):
-            #     self.detected.emit(name)
-            self.detected.emit(name)
+            if self.controller.is_malware_by_version(name, version) or self.controller.is_malware_by_feature(name,
+                                                                                                             feature):
+                self.detected.emit(name, version)
             unit += int((1 / total) * 100)
             self.progress.emit(unit)
         self.progress.emit(100)
@@ -49,9 +46,16 @@ class UninstallThread(QThread):
     def run(self):
         # 在这里实现卸载流氓软件的功能
         if self.controller.uninstall_software(self.item.text()):
+            print("卸载成功")
             self.progress.emit(50)
             self.uninstalled.emit()
+            for f in self.controller.get_malware_folder(self.item.text(), self.item.data(8888)):
+                print(f"发现残余文件夹 {f}")
+                Controller.safe_delete_folder(folder=f)
+            self.progress.emit(100)
             self.finished.emit()
+        else:
+            print("未卸载")
 
 
 class MainWindow(QMainWindow):
@@ -142,8 +146,10 @@ class MainWindow(QMainWindow):
         self.detect_thread.progress.connect(self.update_progress_bar)
         self.detect_thread.start()
 
-    def add_to_list(self, item):
-        self.list_widget.addItem(item)
+    def add_to_list(self, item, version):
+        list_item = QListWidgetItem(item)
+        list_item.setData(8888, version)
+        self.list_widget.addItem(list_item)
 
     def detect_finished(self):
         self.progress_bar.setValue(0)
@@ -165,6 +171,7 @@ class MainWindow(QMainWindow):
 
     def uninstall_finished(self):
         self.progress_bar.setValue(0)
+        self.detect()
 
     def update_progress_bar(self, value):
         self.progress_bar.setValue(value)

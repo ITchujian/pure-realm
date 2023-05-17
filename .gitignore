@@ -1,0 +1,5 @@
+# 忽略admin文件夹
+/admin
+
+# 忽略测试源
+malware.json
