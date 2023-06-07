@@ -11,4 +11,4 @@ python main.py 或者 python3 main.py
 
 
 
-![image-20230606182014937](/home/ronan/Documents/PythonProject/PureRealm/images/image-20230606182014937.png)
+![image-20230606182014937](https://github.com/ITchujian/pure-realm/blob/master/images/image-20230606182014937.png)
